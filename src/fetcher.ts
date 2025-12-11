@@ -36,6 +36,15 @@ export class NowPlayingFetcher {
 		);
 	}
 
+	private static getYearForDate(date: string): number | undefined {
+		const regex = /^([0-9]+)\-/;
+		const result = regex.exec(date);
+		if (result != null) {
+			const [_, year] = result;
+			return parseInt(year, 10);
+		}
+	}
+
 	private async getDataForRecordingAndRelease(username: string, recordingMBID: MBID, releaseMBID: MBID): Promise<NowPlayingRecording> {
 		const recording = await this.recording.get(recordingMBID);
 		const release = await this.release.get(releaseMBID);
@@ -51,11 +60,11 @@ export class NowPlayingFetcher {
 			releaseTitle: release.title,
 			releaseDisambiguation: NowPlayingFetcher.normalizeDisambiguation(release.disambiguation),
 			releaseMBID: release.id,
-			// releaseYear: release.date // TODO: extract year from date
+			releaseYear: NowPlayingFetcher.getYearForDate(release.date),
 			releaseGroupTitle: release['release-group']!.title,
 			releaseGroupDisambiguation: NowPlayingFetcher.normalizeDisambiguation(release['release-group']!.disambiguation),
 			releaseGroupMBID: release['release-group']!.id,
-			// releaseGroupYear: release['release-group']!.date // TODO: extract year from date
+			releaseGroupYear: NowPlayingFetcher.getYearForDate(release['release-group']!['first-release-date']),
 		};
 	}
 
@@ -78,7 +87,7 @@ export class NowPlayingFetcher {
 			releaseGroupTitle: releaseGroup.title,
 			releaseGroupDisambiguation: NowPlayingFetcher.normalizeDisambiguation(releaseGroup.disambiguation),
 			releaseGroupMBID: releaseGroup.id,
-			// releaseGroupYear: releaseGroup.date // TODO: extract year from date
+			releaseGroupYear: NowPlayingFetcher.getYearForDate(releaseGroup['first-release-date']),
 		};
 	}
 
@@ -107,7 +116,7 @@ export class NowPlayingFetcher {
 			releaseGroupTitle: releaseGroup.title,
 			releaseGroupDisambiguation: NowPlayingFetcher.normalizeDisambiguation(releaseGroup.disambiguation),
 			releaseGroupMBID: releaseGroup.id,
-			// releaseGroupYear: releaseGroup.date // TODO: extract year from date
+			releaseGroupYear: NowPlayingFetcher.getYearForDate(releaseGroup['first-release-date']),
 		};
 	}
 
