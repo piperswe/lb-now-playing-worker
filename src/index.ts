@@ -11,8 +11,29 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import { playingNowCacher } from './cacher';
+import { ListenbrainzClient } from './listenbrainz';
+import { updateKV } from './updater';
+import { AutoRouter, IRequestStrict } from 'itty-router';
+
+const router = AutoRouter<IRequestStrict, [Env, ExecutionContext]>();
+
+router.get('/update', async function (_, env) {
+	try {
+		await updateKV(env);
+	} catch (e) {
+		return new Response(`${e}`, { status: 500 });
+	}
+	return new Response('OK');
+});
+router.get('/user/:username', async function ({ params: { username } }, env) {
+	const cacher = playingNowCacher(env.LB_NOW_PLAYING, new ListenbrainzClient());
+	return await cacher.get(username);
+});
+
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+	fetch: router.fetch.bind(router),
+	async scheduled(controller, env, ctx) {
+		await updateKV(env);
 	},
 } satisfies ExportedHandler<Env>;

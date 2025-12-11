@@ -4,12 +4,30 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
+	"account_id": "1c495e64ff5fd527342d7b7bf6731a1f",
 	"name": "lb-now-playing-worker",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-12-11",
 	"observability": {
-		"enabled": true
-	}
+		"enabled": true,
+	},
+	"kv_namespaces": [
+		{
+			"binding": "LB_NOW_PLAYING",
+			"id": "92d5b8024b1a491d9a0f7a80199b4186",
+		},
+	],
+	"triggers": {
+		"crons": ["* * * * *"],
+	},
+	"routes": [
+		{
+			"pattern": "lbnp.piperswe.me",
+			"custom_domain": true,
+		},
+	],
+	"workers_dev": true,
+	"preview_urls": true,
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
