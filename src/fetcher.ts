@@ -5,9 +5,6 @@ import { ArtistCredit, NowPlaying, NowPlayingRecording } from './now_playing';
 import { convertMediaPlayerName, convertStreamingService, convertStreamingServiceName } from './media_players';
 
 export class NowPlayingFetcher {
-	private lb: ListenBrainzClient;
-	private mb: MusicBrainzApi;
-
 	private playingNow: ReturnType<typeof playingNowCacher>;
 	private lbRecording: ReturnType<typeof lbRecordingCacher>;
 	private recording: ReturnType<typeof recordingCacher>;
@@ -15,9 +12,6 @@ export class NowPlayingFetcher {
 	private releaseGroup: ReturnType<typeof releaseGroupCacher>;
 
 	constructor(namespace: KVNamespace, lb: ListenBrainzClient, mb: MusicBrainzApi) {
-		this.lb = lb;
-		this.mb = mb;
-
 		this.playingNow = playingNowCacher(namespace, lb);
 		this.lbRecording = lbRecordingCacher(namespace, lb);
 		this.recording = recordingCacher(namespace, mb);
