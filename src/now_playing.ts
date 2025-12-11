@@ -1,5 +1,5 @@
 import { MBID } from './musicbrainz';
-import { MediaPlayer, StreamingService } from './media_players';
+import { MediaPlayer, StreamingService } from './data';
 
 export interface ArtistCredit {
 	name: string;

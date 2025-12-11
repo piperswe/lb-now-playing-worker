@@ -2,7 +2,7 @@ import { IArtistCredit, MusicBrainzApi } from 'musicbrainz-api';
 import { ListenBrainzClient, playingNowCacher, lbRecordingCacher, Listen } from './listenbrainz';
 import { recordingCacher, releaseCacher, releaseGroupCacher, MBID } from './musicbrainz';
 import { ArtistCredit, NowPlaying, NowPlayingRecording } from './now_playing';
-import { convertMediaPlayerName, convertStreamingService, convertStreamingServiceName } from './media_players';
+import { convertMediaPlayerName, convertStreamingService, convertStreamingServiceName } from './data';
 
 export class NowPlayingFetcher {
 	private playingNow: ReturnType<typeof playingNowCacher>;
