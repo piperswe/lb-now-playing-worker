@@ -14,6 +14,7 @@ export const AdditionalInfo = z.object({
 	tags: z.optional(z.array(z.string())),
 	media_player: z.optional(z.string()),
 	media_player_version: z.optional(z.string()),
+	listening_from: z.optional(z.string()),
 	submission_client: z.optional(z.string()),
 	submission_client_version: z.optional(z.string()),
 	music_service: z.optional(z.string()),

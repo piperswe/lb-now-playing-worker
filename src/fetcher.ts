@@ -192,7 +192,7 @@ export class NowPlayingFetcher {
 		const musicService = listen.track_metadata.additional_info?.music_service;
 		const musicServiceName = listen.track_metadata.additional_info?.music_service_name;
 		const originURL = listen.track_metadata.additional_info?.origin_url;
-		const mediaPlayer = listen.track_metadata.additional_info?.media_player;
+		const mediaPlayer = listen.track_metadata.additional_info?.media_player ?? listen.track_metadata.additional_info?.listening_from;
 
 		if (musicService != null) {
 			nowPlaying.musicService = convertStreamingService(musicService);

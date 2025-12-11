@@ -12,6 +12,10 @@ export const mediaPlayers: Record<string, MediaPlayer> = {
 		name: 'Plex',
 		url: 'https://www.plex.tv/',
 	},
+	Longplay: {
+		name: 'Longplay',
+		url: 'https://longplay.rocks',
+	},
 };
 
 export function convertMediaPlayerName(name: string): MediaPlayer {
