@@ -55,7 +55,7 @@ export class NowPlayingFetcher {
 			recordingTitle: recording.title,
 			recordingDisambiguation: NowPlayingFetcher.normalizeDisambiguation(recording.disambiguation),
 			recordingMBID: recording.id,
-			durationSeconds: recording.length,
+			durationSeconds: recording.length / 1000,
 			credits,
 			releaseTitle: release.title,
 			releaseDisambiguation: NowPlayingFetcher.normalizeDisambiguation(release.disambiguation),
@@ -82,7 +82,7 @@ export class NowPlayingFetcher {
 			recordingTitle: recording.title,
 			recordingDisambiguation: NowPlayingFetcher.normalizeDisambiguation(recording.disambiguation),
 			recordingMBID: recording.id,
-			durationSeconds: recording.length,
+			durationSeconds: recording.length / 1000,
 			credits,
 			releaseGroupTitle: releaseGroup.title,
 			releaseGroupDisambiguation: NowPlayingFetcher.normalizeDisambiguation(releaseGroup.disambiguation),
@@ -100,7 +100,7 @@ export class NowPlayingFetcher {
 			recordingTitle: recording.title,
 			recordingDisambiguation: NowPlayingFetcher.normalizeDisambiguation(recording.disambiguation),
 			recordingMBID: recording.id,
-			durationSeconds: recording.length,
+			durationSeconds: recording.length / 1000,
 			credits,
 		};
 	}
@@ -190,7 +190,6 @@ export class NowPlayingFetcher {
 		let listenedAt: string | undefined = undefined;
 		let listenedAtTS = listen['listened_at'];
 		if (listenedAtTS != null) {
-			listenedAtTS /= 1000;
 			historical =
 				np.durationSeconds == 0 || (durationSeconds != null && listenedAtTS < new Date().getTime() - durationSeconds * DURATION_MULTIPLIER);
 			listenedAt = new Date(listenedAtTS).toLocaleString();
