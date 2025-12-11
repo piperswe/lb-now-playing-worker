@@ -32,16 +32,11 @@ export const TrackMetadata = z.object({
 });
 export type TrackMetadata = z.infer<typeof TrackMetadata>;
 
-export const Listen = z.union([
-	z.object({
-		track_metadata: TrackMetadata,
-		listened_at: z.number(),
-	}),
-	z.object({
-		track_metadata: TrackMetadata,
-		playing_now: z.literal(true),
-	}),
-]);
+export const Listen = z.object({
+	track_metadata: TrackMetadata,
+	playing_now: z.optional(z.boolean()),
+	listened_at: z.optional(z.number()),
+});
 export type Listen = z.infer<typeof Listen>;
 
 export const ListensPayload = z.object({

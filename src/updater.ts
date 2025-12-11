@@ -1,14 +1,14 @@
-import { playingNowCacher } from './cacher';
+import { Environment } from '.';
+import { NowPlayingFetcher } from './fetcher';
 import { ListenbrainzClient } from './listenbrainz';
-import { ListensResponse } from './listenbrainz_types';
+import { getMusicBrainzAPI } from './musicbrainz';
 
-export async function updateKV(env: Env) {
+export async function updateKV(env: Environment) {
 	const usernames = ['piperswe', 'kutx'];
-	const client = new ListenbrainzClient();
-	const cacher = playingNowCacher(env.LB_NOW_PLAYING, client);
+	const fetcher = new NowPlayingFetcher(env.LB_NOW_PLAYING, new ListenbrainzClient(env.LISTENBRAINZ_API_KEY), getMusicBrainzAPI());
 	await Promise.all(
 		usernames.map(async (username) => {
-			await cacher.put(username);
+			await fetcher.getNowPlaying(username);
 		}),
 	);
 }

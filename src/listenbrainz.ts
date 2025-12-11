@@ -1,11 +1,13 @@
 import * as z from 'zod';
 import { ListensResponse, LookupResponse } from './listenbrainz_types';
+import { Cacher } from './cacher';
+import { MINUTE, MONTH, SECOND } from './time';
 
 export class ListenbrainzClient {
 	private baseURL: string;
 	private apiToken: string | null;
 
-	constructor(baseURL: string = 'https://api.listenbrainz.org', apiToken: string | null = null) {
+	constructor(apiToken: string | null = null, baseURL: string = 'https://api.listenbrainz.org') {
 		this.baseURL = baseURL;
 		this.apiToken = apiToken;
 	}
@@ -38,7 +40,7 @@ export class ListenbrainzClient {
 	): Promise<z.output<T>> {
 		const response = await this.get(path, searchParams);
 		if (!response.ok) {
-			throw new Error(`got error code ${response.status}, expected 200`);
+			throw new Error(`got error code ${response.status}, expected 200. body: ${await response.text()}`);
 		}
 		const json = await response.json();
 		const parsed = await outputType.parseAsync(json);
@@ -46,6 +48,7 @@ export class ListenbrainzClient {
 	}
 
 	async lookupRecording(artist: string, track: string, release: string | null = null): Promise<LookupResponse> {
+		console.log('looking up recording', { artist, track, release });
 		const path = '/1/metadata/lookup';
 		const search: Record<string, string> = {
 			artist_name: artist,
@@ -58,15 +61,36 @@ export class ListenbrainzClient {
 	}
 
 	async playingNow(username: string): Promise<ListensResponse> {
+		console.log('getting playing now', { username });
 		const path = `/1/user/${encodeURIComponent(username)}/playing-now`;
 		return await this.getJson(ListensResponse, path);
 	}
 
 	async listens(username: string, count: number): Promise<ListensResponse> {
+		console.log('getting listens', { username, count });
 		const path = `/1/user/${encodeURIComponent(username)}/listens`;
 		const search = {
 			count: `${count}`,
 		};
 		return await this.getJson(ListensResponse, path, search);
 	}
+}
+
+export function playingNowCacher(namespace: KVNamespace, client: ListenbrainzClient): Cacher<ListensResponse> {
+	return new Cacher(namespace, 'playing-now', (username) => client.playingNow(username), 2 * MINUTE, 30 * SECOND);
+}
+
+export interface LBRecordingKey {
+	artistName: string;
+	trackName: string;
+	releaseName: string | null;
+}
+
+export function lbRecordingCacher(namespace: KVNamespace, client: ListenbrainzClient): Cacher<LookupResponse, LBRecordingKey> {
+	return new Cacher(
+		namespace,
+		'lb-recording',
+		({ artistName, trackName, releaseName }) => client.lookupRecording(artistName, trackName, releaseName),
+		MONTH,
+	);
 }

@@ -11,12 +11,17 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { playingNowCacher } from './cacher';
-import { ListenbrainzClient } from './listenbrainz';
+import { NowPlayingFetcher } from './fetcher';
+import { ListenbrainzClient, playingNowCacher } from './listenbrainz';
+import { getMusicBrainzAPI } from './musicbrainz';
 import { updateKV } from './updater';
 import { AutoRouter, IRequestStrict } from 'itty-router';
 
-const router = AutoRouter<IRequestStrict, [Env, ExecutionContext]>();
+export interface Environment extends Env {
+	LISTENBRAINZ_API_KEY: string;
+}
+
+const router = AutoRouter<IRequestStrict, [Environment, ExecutionContext]>();
 
 router.get('/update', async function (_, env) {
 	try {
@@ -27,13 +32,13 @@ router.get('/update', async function (_, env) {
 	return new Response('OK');
 });
 router.get('/user/:username', async function ({ params: { username } }, env) {
-	const cacher = playingNowCacher(env.LB_NOW_PLAYING, new ListenbrainzClient());
-	return await cacher.get(username);
+	const fetcher = new NowPlayingFetcher(env.LB_NOW_PLAYING, new ListenbrainzClient(env.LISTENBRAINZ_API_KEY), getMusicBrainzAPI());
+	return await fetcher.getNowPlaying(username);
 });
 
 export default {
 	fetch: router.fetch.bind(router),
 	async scheduled(controller, env, ctx) {
-		await updateKV(env);
+		await updateKV(env as Environment);
 	},
 } satisfies ExportedHandler<Env>;

@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"itty-router": "^5.0.22",
+		"musicbrainz-api": "^0.27.0",
 		"zod": "^4.1.13"
 	}
 }

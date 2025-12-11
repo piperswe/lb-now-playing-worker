@@ -1,42 +1,31 @@
-import { ListenbrainzClient } from './listenbrainz';
-import { ListensResponse } from './listenbrainz_types';
-
-export class Cacher<T> {
+export class Cacher<T, Key = string> {
 	constructor(
 		private namespace: KVNamespace,
 		private prefix: string,
-		private fetcher: (key: string) => T | Promise<T>,
+		private fetcher: (key: Key) => T | Promise<T>,
 		private ttl: number, // seconds
 		private coloCacheTtl: number = ttl, // seconds to cache locally in the colo's cache
 	) {}
 
-	private kvKey(key: string): string {
-		return `${this.prefix}:${key}`;
+	private kvKey(key: Key): string {
+		return `${this.prefix}:${JSON.stringify(key)}`;
 	}
 
-	async get(key: string): Promise<T> {
+	async get(key: Key): Promise<T> {
 		const kvKey = this.kvKey(key);
 		const kvValue = await this.namespace.get(kvKey, { cacheTtl: this.coloCacheTtl });
 		if (kvValue == null) {
+			console.log('cache miss', { kvKey });
 			return await this.put(key);
 		}
+		console.log('cache hit', { kvKey });
 		return JSON.parse(kvValue);
 	}
 
-	async put(key: string): Promise<T> {
+	async put(key: Key): Promise<T> {
 		const kvKey = this.kvKey(key);
 		const fetched = await this.fetcher(key);
 		await this.namespace.put(kvKey, JSON.stringify(fetched), { expirationTtl: this.ttl });
 		return fetched;
 	}
-}
-
-export function playingNowCacher(namespace: KVNamespace, client: ListenbrainzClient): Cacher<ListensResponse> {
-	return new Cacher(
-		namespace,
-		'playing-now',
-		(username) => client.playingNow(username),
-		2 * 60, // 2 minutes
-		30,
-	);
 }
