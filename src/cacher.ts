@@ -7,6 +7,7 @@ export class Cacher<T> {
 		private prefix: string,
 		private fetcher: (key: string) => T | Promise<T>,
 		private ttl: number, // seconds
+		private coloCacheTtl: number = ttl, // seconds to cache locally in the colo's cache
 	) {}
 
 	private kvKey(key: string): string {
@@ -15,7 +16,7 @@ export class Cacher<T> {
 
 	async get(key: string): Promise<T> {
 		const kvKey = this.kvKey(key);
-		const kvValue = await this.namespace.get(kvKey);
+		const kvValue = await this.namespace.get(kvKey, { cacheTtl: this.coloCacheTtl });
 		if (kvValue == null) {
 			return await this.put(key);
 		}
@@ -36,5 +37,6 @@ export function playingNowCacher(namespace: KVNamespace, client: ListenbrainzCli
 		'playing-now',
 		(username) => client.playingNow(username),
 		2 * 60, // 2 minutes
+		30,
 	);
 }
