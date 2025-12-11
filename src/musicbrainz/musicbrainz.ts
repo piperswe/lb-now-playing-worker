@@ -1,6 +1,6 @@
 import { IRecording, IRelease, IReleaseGroup, MusicBrainzApi } from 'musicbrainz-api';
-import { Cacher } from './cacher';
-import { MONTH } from './time';
+import { Cacher } from '../cacher';
+import { MONTH } from '../time';
 
 export function getMusicBrainzAPI(): MusicBrainzApi {
 	return new MusicBrainzApi({

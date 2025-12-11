@@ -12,7 +12,7 @@
  */
 
 import { NowPlayingFetcher } from './fetcher';
-import { ListenbrainzClient, playingNowCacher } from './listenbrainz';
+import { ListenBrainzClient } from './listenbrainz';
 import { getMusicBrainzAPI } from './musicbrainz';
 import { updateKV } from './updater';
 import { AutoRouter, IRequestStrict } from 'itty-router';
@@ -32,7 +32,7 @@ router.get('/update', async function (_, env) {
 	return new Response('OK');
 });
 router.get('/user/:username', async function ({ params: { username } }, env) {
-	const fetcher = new NowPlayingFetcher(env.LB_NOW_PLAYING, new ListenbrainzClient(env.LISTENBRAINZ_API_KEY), getMusicBrainzAPI());
+	const fetcher = new NowPlayingFetcher(env.LB_NOW_PLAYING, new ListenBrainzClient(env.LISTENBRAINZ_API_KEY), getMusicBrainzAPI());
 	return await fetcher.getNowPlaying(username);
 });
 

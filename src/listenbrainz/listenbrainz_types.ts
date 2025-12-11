@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { MBID } from './musicbrainz_types';
+import { MBID } from '../musicbrainz';
 
 export const AdditionalInfo = z.object({
 	artist_mbids: z.optional(z.array(MBID)),

@@ -1,6 +1,8 @@
+import { IKVNamespace } from './interfaces';
+
 export class Cacher<T, Key = string> {
 	constructor(
-		private namespace: KVNamespace,
+		private namespace: IKVNamespace,
 		private prefix: string,
 		private fetcher: (key: Key) => T | Promise<T>,
 		private ttl: number, // seconds

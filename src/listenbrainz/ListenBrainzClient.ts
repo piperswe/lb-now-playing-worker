@@ -1,9 +1,7 @@
 import * as z from 'zod';
-import { ListensResponse, LookupResponse } from './listenbrainz_types';
-import { Cacher } from './cacher';
-import { MINUTE, MONTH, SECOND } from './time';
+import { ListensResponse, LookupResponse, IListenBrainzClient } from '.';
 
-export class ListenbrainzClient {
+export class ListenBrainzClient implements IListenBrainzClient {
 	private baseURL: string;
 	private apiToken: string | null;
 
@@ -74,23 +72,4 @@ export class ListenbrainzClient {
 		};
 		return await this.getJson(ListensResponse, path, search);
 	}
-}
-
-export function playingNowCacher(namespace: KVNamespace, client: ListenbrainzClient): Cacher<ListensResponse> {
-	return new Cacher(namespace, 'playing-now', (username) => client.playingNow(username), 2 * MINUTE, 30 * SECOND);
-}
-
-export interface LBRecordingKey {
-	artistName: string;
-	trackName: string;
-	releaseName: string | null;
-}
-
-export function lbRecordingCacher(namespace: KVNamespace, client: ListenbrainzClient): Cacher<LookupResponse, LBRecordingKey> {
-	return new Cacher(
-		namespace,
-		'lb-recording',
-		({ artistName, trackName, releaseName }) => client.lookupRecording(artistName, trackName, releaseName),
-		MONTH,
-	);
 }

@@ -1,13 +1,11 @@
 import { IArtistCredit, MusicBrainzApi } from 'musicbrainz-api';
-import { ListenbrainzClient, playingNowCacher, lbRecordingCacher } from './listenbrainz';
-import { recordingCacher, releaseCacher, releaseGroupCacher } from './musicbrainz';
-import { MBID } from './musicbrainz_types';
+import { ListenBrainzClient, playingNowCacher, lbRecordingCacher, Listen } from './listenbrainz';
+import { recordingCacher, releaseCacher, releaseGroupCacher, MBID } from './musicbrainz';
 import { ArtistCredit, NowPlaying, NowPlayingRecording } from './now_playing';
-import { Listen } from './listenbrainz_types';
 import { convertMediaPlayerName, convertStreamingService, convertStreamingServiceName } from './media_players';
 
 export class NowPlayingFetcher {
-	private lb: ListenbrainzClient;
+	private lb: ListenBrainzClient;
 	private mb: MusicBrainzApi;
 
 	private playingNow: ReturnType<typeof playingNowCacher>;
@@ -16,7 +14,7 @@ export class NowPlayingFetcher {
 	private release: ReturnType<typeof releaseCacher>;
 	private releaseGroup: ReturnType<typeof releaseGroupCacher>;
 
-	constructor(namespace: KVNamespace, lb: ListenbrainzClient, mb: MusicBrainzApi) {
+	constructor(namespace: KVNamespace, lb: ListenBrainzClient, mb: MusicBrainzApi) {
 		this.lb = lb;
 		this.mb = mb;
 
