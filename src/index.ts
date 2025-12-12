@@ -16,6 +16,8 @@ import { ListenBrainzClient } from './listenbrainz';
 import { getMusicBrainzAPI } from './musicbrainz';
 import { updateKV } from './updater';
 import { AutoRouter, IRequestStrict } from 'itty-router';
+import { render, renderIFrame } from './widget';
+import { CoverArtArchiveClient } from './cover_art_archive';
 
 export interface Environment extends Env {
 	LISTENBRAINZ_API_KEY: string;
@@ -32,8 +34,34 @@ router.get('/update', async function (_, env) {
 	return new Response('OK');
 });
 router.get('/user/:username', async function ({ params: { username } }, env) {
-	const fetcher = new NowPlayingFetcher(env.LB_NOW_PLAYING, new ListenBrainzClient(env.LISTENBRAINZ_API_KEY), getMusicBrainzAPI());
-	return await fetcher.getNowPlaying(username);
+	const iframe = username.endsWith('.iframe.html');
+	const html = username.endsWith('.html');
+	const strippedUsername = username.replace(/(\.iframe)?\.html$/, '');
+	const fetcher = new NowPlayingFetcher(
+		env.LB_NOW_PLAYING,
+		new ListenBrainzClient(env.LISTENBRAINZ_API_KEY),
+		getMusicBrainzAPI(),
+		new CoverArtArchiveClient(),
+	);
+	const data = await fetcher.getNowPlaying(strippedUsername);
+	if (data == null) {
+		return new Response('not found', { status: 404 });
+	}
+	if (iframe) {
+		return new Response(renderIFrame(data), {
+			headers: {
+				'Content-Type': 'text/html; charset=utf-8',
+			},
+		});
+	} else if (html) {
+		return new Response(render(data), {
+			headers: {
+				'Content-Type': 'text/html; charset=utf-8',
+			},
+		});
+	} else {
+		return data;
+	}
 });
 
 export default {

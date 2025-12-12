@@ -11,13 +11,17 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"@types/vhtml": "^2.2.9",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.0",
 		"wrangler": "^4.54.0"
 	},
 	"dependencies": {
+		"htm": "^3.1.1",
+		"http-status-codes": "^2.3.0",
 		"itty-router": "^5.0.22",
 		"musicbrainz-api": "^0.27.0",
+		"vhtml": "^2.2.0",
 		"zod": "^4.1.13"
 	}
 }

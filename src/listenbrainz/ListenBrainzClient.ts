@@ -1,48 +1,19 @@
 import * as z from 'zod';
 import { ListensResponse, LookupResponse, IListenBrainzClient } from '.';
+import { HTTPClient } from '../HTTPClient';
 
-export class ListenBrainzClient implements IListenBrainzClient {
-	private baseURL: string;
-	private apiToken: string | null;
-
-	constructor(apiToken: string | null = null, baseURL: string = 'https://api.listenbrainz.org') {
-		this.baseURL = baseURL;
-		this.apiToken = apiToken;
+export class ListenBrainzClient extends HTTPClient implements IListenBrainzClient {
+	constructor(
+		private apiToken: string | null = null,
+		baseURL: string = 'https://api.listenbrainz.org',
+	) {
+		super(baseURL);
 	}
 
-	private async get(
-		path: string,
-		searchParams: URLSearchParams | ConstructorParameters<typeof URLSearchParams>[0] = new URLSearchParams(),
-	): Promise<Response> {
-		const urlString = `${this.baseURL}${path}`;
-		const url = new URL(urlString);
-		const newSearchParams = searchParams instanceof URLSearchParams ? searchParams : new URLSearchParams(searchParams);
-		newSearchParams.forEach((value, key) => {
-			url.searchParams.append(key, value);
-		});
-		const req = new Request(url, {
-			headers: {
-				'User-Agent': 'github.com/piperswe/lb-now-playing-worker',
-			},
-		});
+	protected override addHeaders(headers: Headers): void {
 		if (this.apiToken != null) {
-			req.headers.append('Authorization', `Token ${this.apiToken}`);
+			headers.append('Authorization', `Token ${this.apiToken}`);
 		}
-		return await fetch(req);
-	}
-
-	private async getJson<T extends z.ZodType>(
-		outputType: T,
-		path: string,
-		searchParams: URLSearchParams | ConstructorParameters<typeof URLSearchParams>[0] = new URLSearchParams(),
-	): Promise<z.output<T>> {
-		const response = await this.get(path, searchParams);
-		if (!response.ok) {
-			throw new Error(`got error code ${response.status}, expected 200. body: ${await response.text()}`);
-		}
-		const json = await response.json();
-		const parsed = await outputType.parseAsync(json);
-		return parsed;
 	}
 
 	async lookupRecording(artist: string, track: string, release: string | null = null): Promise<LookupResponse> {

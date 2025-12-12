@@ -1,8 +1,9 @@
 import { IArtistCredit, MusicBrainzApi } from 'musicbrainz-api';
-import { ListenBrainzClient, playingNowCacher, lbRecordingCacher, Listen } from './listenbrainz';
+import { ListenBrainzClient, playingNowCacher, lbRecordingCacher, Listen, IListenBrainzClient } from './listenbrainz';
 import { recordingCacher, releaseCacher, releaseGroupCacher, MBID } from './musicbrainz';
 import { ArtistCredit, NowPlaying, NowPlayingRecording } from './now_playing';
 import { convertMediaPlayerName, convertStreamingService, convertStreamingServiceName } from './data';
+import { ICoverArtArchiveClient, releaseFrontCacher, releaseGroupFrontCacher } from './cover_art_archive';
 
 export class NowPlayingFetcher {
 	private playingNow: ReturnType<typeof playingNowCacher>;
@@ -10,13 +11,17 @@ export class NowPlayingFetcher {
 	private recording: ReturnType<typeof recordingCacher>;
 	private release: ReturnType<typeof releaseCacher>;
 	private releaseGroup: ReturnType<typeof releaseGroupCacher>;
+	private releaseFront: ReturnType<typeof releaseFrontCacher>;
+	private releaseGroupFront: ReturnType<typeof releaseGroupFrontCacher>;
 
-	constructor(namespace: KVNamespace, lb: ListenBrainzClient, mb: MusicBrainzApi) {
+	constructor(namespace: KVNamespace, lb: IListenBrainzClient, mb: MusicBrainzApi, caa: ICoverArtArchiveClient) {
 		this.playingNow = playingNowCacher(namespace, lb);
 		this.lbRecording = lbRecordingCacher(namespace, lb);
 		this.recording = recordingCacher(namespace, mb);
 		this.release = releaseCacher(namespace, mb);
 		this.releaseGroup = releaseGroupCacher(namespace, mb);
+		this.releaseFront = releaseFrontCacher(namespace, caa);
+		this.releaseGroupFront = releaseGroupFrontCacher(namespace, caa);
 	}
 
 	private static normalizeDisambiguation(disambiguation: string | undefined): string | undefined {
@@ -49,7 +54,7 @@ export class NowPlayingFetcher {
 		const recording = await this.recording.get(recordingMBID);
 		const release = await this.release.get(releaseMBID);
 		const credits = NowPlayingFetcher.createCredits(recording['artist-credit']);
-		// TODO: cover art
+		const coverArt = await this.releaseFront.get(releaseMBID);
 		return {
 			username,
 			recordingTitle: recording.title,
@@ -65,6 +70,7 @@ export class NowPlayingFetcher {
 			releaseGroupDisambiguation: NowPlayingFetcher.normalizeDisambiguation(release['release-group']!.disambiguation),
 			releaseGroupMBID: release['release-group']!.id,
 			releaseGroupYear: NowPlayingFetcher.getYearForDate(release['release-group']!['first-release-date']),
+			coverArt,
 		};
 	}
 
@@ -76,7 +82,7 @@ export class NowPlayingFetcher {
 		const recording = await this.recording.get(recordingMBID);
 		const releaseGroup = await this.releaseGroup.get(releaseGroupMBID);
 		const credits = NowPlayingFetcher.createCredits(recording['artist-credit']);
-		// TODO: cover art
+		const coverArt = await this.releaseGroupFront.get(releaseGroupMBID);
 		return {
 			username,
 			recordingTitle: recording.title,
@@ -88,13 +94,13 @@ export class NowPlayingFetcher {
 			releaseGroupDisambiguation: NowPlayingFetcher.normalizeDisambiguation(releaseGroup.disambiguation),
 			releaseGroupMBID: releaseGroup.id,
 			releaseGroupYear: NowPlayingFetcher.getYearForDate(releaseGroup['first-release-date']),
+			coverArt,
 		};
 	}
 
 	private async getDataForRecording(username: string, recordingMBID: MBID): Promise<NowPlayingRecording> {
 		const recording = await this.recording.get(recordingMBID);
 		const credits = NowPlayingFetcher.createCredits(recording['artist-credit']);
-		// TODO: cover art
 		return {
 			username,
 			recordingTitle: recording.title,
@@ -108,7 +114,7 @@ export class NowPlayingFetcher {
 	private async getDataForReleaseGroup(username: string, releaseGroupMBID: MBID, trackName: string): Promise<NowPlayingRecording> {
 		const releaseGroup = await this.releaseGroup.get(releaseGroupMBID);
 		const credits = NowPlayingFetcher.createCredits(releaseGroup['artist-credit']);
-		// TODO: cover art
+		const coverArt = await this.releaseGroupFront.get(releaseGroupMBID);
 		return {
 			username,
 			recordingTitle: trackName,
@@ -117,6 +123,7 @@ export class NowPlayingFetcher {
 			releaseGroupDisambiguation: NowPlayingFetcher.normalizeDisambiguation(releaseGroup.disambiguation),
 			releaseGroupMBID: releaseGroup.id,
 			releaseGroupYear: NowPlayingFetcher.getYearForDate(releaseGroup['first-release-date']),
+			coverArt,
 		};
 	}
 

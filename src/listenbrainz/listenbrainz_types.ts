@@ -63,10 +63,10 @@ export const ListensResponse = z.object({
 export type ListensResponse = z.infer<typeof ListensResponse>;
 
 export const LookupResponse = z.object({
-	artist_credit_name: z.string(),
-	artist_mbids: z.array(MBID),
-	recording_mbid: MBID,
-	recording_name: z.string(),
+	artist_credit_name: z.optional(z.string()),
+	artist_mbids: z.optional(z.array(MBID)),
+	recording_mbid: z.optional(MBID),
+	recording_name: z.optional(z.string()),
 	release_mbid: z.optional(MBID),
 	release_name: z.optional(z.string()),
 });
