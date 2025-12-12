@@ -190,8 +190,9 @@ export class NowPlayingFetcher {
 		let listenedAt: string | undefined = undefined;
 		let listenedAtTS = listen['listened_at'];
 		if (listenedAtTS != null) {
-			historical =
-				np.durationSeconds == 0 || (durationSeconds != null && listenedAtTS < new Date().getTime() - durationSeconds * DURATION_MULTIPLIER);
+			if (durationSeconds != null && durationSeconds != 0) {
+				historical = listenedAtTS < new Date().getTime() - durationSeconds * DURATION_MULTIPLIER;
+			}
 			listenedAt = new Date(listenedAtTS).toLocaleString();
 		}
 
